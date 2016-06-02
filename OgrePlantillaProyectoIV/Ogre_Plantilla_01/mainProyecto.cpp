@@ -1,10 +1,99 @@
 #include "Ogre\ExampleApplication.h"
 
+float test;
+Ogre::AnimationState* animationStateTurret301;
 
+class FrameListenerClase : public Ogre::FrameListener{
+
+private:
+	Ogre::SceneNode* _nodoF01;
+	
+
+
+	OIS::InputManager* _man;
+	OIS::Keyboard* _key;
+	OIS::Mouse* _mouse;
+	Ogre::Camera* _cam;
+
+public:
+	FrameListenerClase(Ogre::Camera* cam, RenderWindow* win){
+
+		//Configuracion para captura de teclado y mouse 
+		size_t windowHnd = 0;
+		std::stringstream windowHndStr;
+		win->getCustomAttribute("WINDOW",&windowHnd);
+		windowHndStr << windowHnd;
+
+		OIS::ParamList pl;
+		pl.insert(std::make_pair(std::string("WINDOW"),windowHndStr.str()));
+
+		//eventos
+		_man = OIS::InputManager::createInputSystem(pl);
+		_key = static_cast<OIS::Keyboard*>(_man->createInputObject(OIS::OISKeyboard,false));
+		_mouse = static_cast<OIS::Mouse*>(_man->createInputObject(OIS::OISMouse,false));
+		_cam = cam;
+		
+		
+	}
+
+
+	~FrameListenerClase(){
+		_man->destroyInputObject(_key);
+		_man->destroyInputObject(_mouse);
+		OIS::InputManager::destroyInputSystem(_man);
+	}
+
+	bool frameStarted(const Ogre::FrameEvent &evt){
+		float cam_speed = 10;
+		_key->capture();
+		_mouse->capture();
+
+		float movSpeed=10.0f;
+		Ogre::Vector3 tmov(0,0,0);
+		Ogre::Vector3 tcam(0,0,0);
+
+		//Camara
+		if(_key->isKeyDown(OIS::KC_LSHIFT))
+			cam_speed += 10;
+
+		if (_key->isKeyDown(OIS::KC_ESCAPE))
+			return false;
+
+		if(_key->isKeyDown(OIS::KC_W))
+			tcam += Ogre::Vector3(0,0,-cam_speed);
+		
+		if(_key->isKeyDown(OIS::KC_S))
+			tcam += Ogre::Vector3(0,0,cam_speed);
+
+		if(_key->isKeyDown(OIS::KC_A))
+			tcam += Ogre::Vector3(-cam_speed,0,0);
+		
+		if(_key->isKeyDown(OIS::KC_D))
+			tcam += Ogre::Vector3(cam_speed,0,0);
+
+		
+		
+
+		
+
+		//camara control
+		float rotX = _mouse->getMouseState().X.rel * evt.timeSinceLastFrame*-1;
+		float rotY = _mouse->getMouseState().Y.rel * evt.timeSinceLastFrame*-1;
+		_cam->yaw(Ogre::Radian(rotX));
+		_cam->pitch(Ogre::Radian(rotY));
+		_cam->moveRelative(tcam*movSpeed*evt.timeSinceLastFrame);
+		
+
+		animationStateTurret301->addTime(evt.timeSinceLastFrame);
+		return true;
+	}
+
+};
 class Example1 : public ExampleApplication
 {
 
 public:
+	Ogre::FrameListener* FrameListener01;
 
 	void createCamera() {
 
@@ -12,6 +101,11 @@ public:
 		mCamera->setPosition(0,10,50);
 		mCamera->lookAt(0,0,-50);
 		mCamera->setNearClipDistance(5);
+
+	}
+	void createFrameListener(){
+		FrameListener01 = new FrameListenerClase(mCamera,mWindow);
+		mRoot->addFrameListener(FrameListener01);
 
 	}
 
@@ -53,7 +147,7 @@ public:
       man->position(-1,-1,0);
       man->colour(0,1,0);
       man->position(1,-1,0);
-      man->colour(0,0,1);
+      man->colour(0,0,1); 
       man->triangle(0,1,2);
       man->end();
       man->convertToMesh("CustomMesh");
@@ -124,6 +218,78 @@ public:
 	 
 	  nodeTurret02->setPosition(22,-7,-407);
 	  //nodeTurret02->setScale(1.2,1.2,1.2);
+
+	  // Turret 3.
+	  Ogre::SceneNode *nodeTurret03 = mSceneMgr->createSceneNode();
+	  mSceneMgr->getRootSceneNode()->addChild(nodeTurret03);
+
+	  Ogre::Entity *subEntityTorret301 = mSceneMgr->createEntity("subEntityTorret301", "usb_dodecaedro.mesh");
+      Ogre::SceneNode *subnodeTurret301 = mSceneMgr->createSceneNode();
+      subnodeTurret301->attachObject(subEntityTorret301);
+	  subnodeTurret301->setPosition(0,0,0);
+	  subnodeTurret301->setScale(1,2.5,1);
+	  
+	  
+
+	  Ogre::Entity *subEntityTorret302 = mSceneMgr->createEntity("subEntityTorret302", "usb_torus.mesh");
+      Ogre::SceneNode *subNodeTurret302 = mSceneMgr->createSceneNode();
+      subNodeTurret302->attachObject(subEntityTorret302);
+	  subNodeTurret302->setPosition(0,0,0);
+	  subNodeTurret302->setScale(3,3,3);
+
+	  //Animacion esfera
+		float duration = 4.0;
+		Ogre::Animation* animationTurret301 = mSceneMgr->createAnimation("AnimTurret301",duration);
+		animationTurret301->setInterpolationMode(Animation::IM_SPLINE);
+		Ogre::NodeAnimationTrack* Turret301Track = animationTurret301->createNodeTrack(0,subNodeTurret302);
+		Ogre::TransformKeyFrame* key;
+
+		key = Turret301Track->createNodeKeyFrame(0.0);
+		key->setTranslate(Vector3(0,0,0));
+		key->setScale(Vector3(3,3,3));
+		
+
+		key = Turret301Track->createNodeKeyFrame(1.0);
+		key->setTranslate(Vector3(0,8,0));
+		key->setScale(Vector3(3,3,3));
+
+		key = Turret301Track->createNodeKeyFrame(2.0);
+		key->setTranslate(Vector3(0,0,0));
+		key->setScale(Vector3(3,3,3));
+
+		key = Turret301Track->createNodeKeyFrame(3.0);
+		key->setTranslate(Vector3(0,-8,0));
+		key->setScale(Vector3(3,3,3));
+
+		key = Turret301Track->createNodeKeyFrame(4.0);
+		key->setTranslate(Vector3(0,0,0));
+		key->setScale(Vector3(3,3,3));
+
+		animationStateTurret301 = mSceneMgr->createAnimationState("AnimTurret301");
+		animationStateTurret301->setEnabled(true);
+		animationStateTurret301->setLoop(true);
+
+	  Ogre::Entity *subEntityTorret303 = mSceneMgr->createEntity("subEntityTorret303", "sphere.mesh");
+      Ogre::SceneNode *subNodeTurret303 = mSceneMgr->createSceneNode();
+      subNodeTurret303->attachObject(subEntityTorret303);
+	  subNodeTurret303->setPosition(0,25,0);
+	  subNodeTurret303->setScale(0.06,0.06,0.06);
+
+	  /*Ogre::Entity *subEntityTorret304 = mSceneMgr->createEntity("subEntityTorret304", "usb_cilindro02.mesh");
+      Ogre::SceneNode *subNodeTurret304 = mSceneMgr->createSceneNode();
+      subNodeTurret304->attachObject(subEntityTorret304);
+	  subNodeTurret304->setPosition(0,5.5,7);
+	  subNodeTurret304->setScale(0.4,0.7,0.4);
+	  subNodeTurret304->pitch(Ogre::Degree(90.0f));*/
+	  
+	  
+	  nodeTurret03->addChild(subnodeTurret301);
+	  nodeTurret03->addChild(subNodeTurret302);
+	  nodeTurret03->addChild(subNodeTurret303);
+	  /*nodeTurret03->addChild(subNodeTurret304);*/
+	 
+	  nodeTurret03->setPosition(-22,-3,-637);
+	  nodeTurret03->setScale(0.4,0.4,0.4);
 
 	}
 
