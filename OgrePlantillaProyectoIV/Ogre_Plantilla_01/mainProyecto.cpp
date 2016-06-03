@@ -109,6 +109,57 @@ public:
 
 	}
 
+	ManualObject* generateParallelepiped(String name, float g_x, float g_y, float g_z, float r_y, float f_h, float f_w1, float f_w2, float b_h, float b_w1,float b_w2, float d){
+
+	 /*
+		Generates a manual object of some kind of parallelepiped that consists on two rectangles
+		with different sizes and positions, but parallel that generates a volumetric figure
+
+		input is
+			name: name of the ManualObject object
+			g_x, g_y, g_z: General x,y,z positions for the whole figure
+			r_y: Relative position in the y axis of the front rectangle
+			f_h, f_w1, f_w2: height, upper and down width of the front rectangle
+			b_h, b_w1, b_w2: height, upper and down width of the back rectangle
+			d: depth of the figure (on the Z axis)
+
+		output is
+			ManualOject object
+
+	 */
+
+	 ManualObject* manual = mSceneMgr->createManualObject(name);
+	  manual->begin("BaseWhiteNoLighting", RenderOperation::OT_TRIANGLE_STRIP);
+	  
+	  
+	  //      position(  R ,    G    , B  )
+
+	  manual->position( g_x+ b_w1, g_y+ -b_h, g_z+ d);        //1 
+	  manual->position( g_x+ b_w2, g_y+ b_h, g_z+ d);         //2 
+	  manual->position( g_x+ -b_w1, g_y+ -b_h, g_z+ d);       //3 
+	  manual->position( g_x+ -b_w2, g_y+  b_h, g_z+ d);       //4 
+
+	  manual->position( g_x+ -f_w1, r_y+ g_y+ -f_h, g_z+ -d); //5 
+	  manual->position( g_x+ -f_w2,  r_y+ g_y+ f_h, g_z+ -d); //6 
+	  manual->position( g_x+ f_w1,  r_y+ g_y+ -f_h, g_z+ -d); //7 
+	  manual->position( g_x+ f_w2, r_y+ g_y+ f_h, g_z+ -d);   //8 
+
+	  manual->position( g_x+ b_w1, g_y+ -b_h, g_z+ d);        //1 
+	  manual->position( g_x+ b_w2, g_y+ b_h, g_z+ d);         //2 
+	  manual->position( g_x+ -b_w2, g_y+  b_h, g_z+ d);       //4 
+	  manual->position( g_x+ f_w2, r_y+ g_y+ f_h, g_z+ -d);   //8 
+	  manual->position( g_x+ -f_w2,  r_y+ g_y+ f_h, g_z+ -d); //6 
+	  manual->position( g_x+ -f_w1, r_y+ g_y+ -f_h, g_z+ -d); //5 
+	  manual->position( g_x+ -b_w1, g_y+ -b_h, g_z+ d);       //3 
+	  manual->position( g_x+ f_w1,  r_y+ g_y+ -f_h, g_z+ -d); //7 
+	  manual->position( g_x+ b_w1, g_y+ -b_h, g_z+ d);        //1 
+
+
+ 
+	  manual->end();
+	  return manual;
+	}
+
 	void createScene()
 	{
 		 
@@ -290,6 +341,43 @@ public:
 	 
 	  nodeTurret03->setPosition(-22,-3,-637);
 	  nodeTurret03->setScale(0.4,0.4,0.4);
+	  
+	  //Spaceship
+
+      Ogre::SceneNode *nodeSpaceship = mSceneMgr->getRootSceneNode()->createChildSceneNode("nodeSpaceship");
+	  Ogre::SceneNode *subNodeSpaceshipLeftWing = nodeSpaceship->createChildSceneNode("subnodeSpaceshipLeftWing");
+	  Ogre::SceneNode *subNodeSpaceshipRightWing = nodeSpaceship->createChildSceneNode("subNodeSpaceshipRightWing");
+
+	  ManualObject* body1;
+	  body1 = generateParallelepiped("body1",0.0,-1.2,0.0,0.0,1.2,1.2,2.3,1.2,1.2,2.3,3.0);
+	  ManualObject* body2;
+	  body2 = generateParallelepiped("body2",0.0,1.2,0.0,0.0,1.2,2.3,1.2,1.2,2.3,1.2,3.0);
+	  ManualObject* body3;
+	  body3 = generateParallelepiped("body3",0.0,-1.2,-9.5,0.9,0.3,0.3,0.8,1.2,1.2,2.3,6.5);
+	  ManualObject* body4;
+	  body4 = generateParallelepiped("body4",0.0,1.2,-9.5,-0.9,0.3,0.8,0.3,1.2,2.3,1.2,6.5);
+	  ManualObject* right_upper_wing;
+	  right_upper_wing = generateParallelepiped("right_upper_wing",6.3,0.3,-1.0,0.0,  0.1, 4.0, 4.0,  0.1,4.0,4.0,  1.0);
+	  ManualObject* right_down_wing;
+	  right_down_wing = generateParallelepiped("right_down_wing",6.3,-0.3,-1.0,0.0,    0.1 ,4.0, 4.0,  0.1,4.0,4.0,  1.0);
+	  ManualObject* left_upper_wing;
+	  left_upper_wing = generateParallelepiped("left_upper_wing",-6.3,0.3,-1.0,0.0,  0.1, 4.0, 4.0,  0.1,4.0,4.0,  1.0);
+	  ManualObject* left_down_wing;
+	  left_down_wing = generateParallelepiped("left_down_wing",-6.3,-0.3,-1.0,0.0,    0.1 ,4.0, 4.0,  0.1,4.0,4.0,  1.0);
+
+	  nodeSpaceship->attachObject(body1);
+	  nodeSpaceship->attachObject(body2);
+	  nodeSpaceship->attachObject(body3);
+	  nodeSpaceship->attachObject(body4);
+	  subNodeSpaceshipRightWing->attachObject(right_upper_wing);
+	  subNodeSpaceshipRightWing->attachObject(right_down_wing);
+	  subNodeSpaceshipLeftWing->attachObject(left_upper_wing);
+	  subNodeSpaceshipLeftWing->attachObject(left_down_wing);
+	  
+	  subNodeSpaceshipLeftWing->setPosition(0,0,0);
+	  subNodeSpaceshipRightWing->setPosition(0,0,0);
+	  nodeSpaceship->setPosition(0, 0, 0);
+
 
 	}
 
