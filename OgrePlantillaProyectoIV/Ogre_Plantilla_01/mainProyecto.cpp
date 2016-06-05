@@ -10,8 +10,32 @@ Ogre::AnimationState* animationStateCloseWingsSpaceship1;
 Ogre::AnimationState* animationStateCloseWingsSpaceship2;
 Ogre::AnimationState* animationStateCloseWingsSpaceship3;
 Ogre::AnimationState* animationStateCloseWingsSpaceship4;
+Ogre::AnimationState* animationStateTurnSpaceshipRight;
+Ogre::AnimationState* animationStateTurnSpaceshipLeft;
+Ogre::AnimationState* animationStateTurnSpaceshipCenterFR;
+Ogre::AnimationState* animationStateTurnSpaceshipCenterFL;
+
+float x_pos = 0.0;
+float z_pos = 0.0;
+
+
+Ogre::SceneNode *nodePlayer;
+
+
+Ogre::Real tr_counter = 0.0;
+Ogre::Real tl_counter = 0.0;
+float spaceship_speed = 0.8;
+
+/*
+	state: 0 for centered spaceship
+		   1 for spaceship turned right
+		   2 for spaceship turned left
+*/
+int state = 0;
 
 bool open = false;
+bool turnLeftNextFrame = false;
+bool turnRightNextFrame = false;
 
 class FrameListenerClase : public Ogre::FrameListener{
 
@@ -24,6 +48,7 @@ private:
 	OIS::Keyboard* _key;
 	OIS::Mouse* _mouse;
 	Ogre::Camera* _cam;
+	
 
 public:
 	FrameListenerClase(Ogre::Camera* cam, RenderWindow* win){
@@ -42,6 +67,7 @@ public:
 		_key = static_cast<OIS::Keyboard*>(_man->createInputObject(OIS::OISKeyboard,false));
 		_mouse = static_cast<OIS::Mouse*>(_man->createInputObject(OIS::OISMouse,false));
 		_cam = cam;
+		nodePlayer->attachObject(_cam);
 		
 		
 	}
@@ -69,18 +95,65 @@ public:
 		if (_key->isKeyDown(OIS::KC_ESCAPE))
 			return false;
 
-		if(_key->isKeyDown(OIS::KC_W))
+		/*if(_key->isKeyDown(OIS::KC_T))
 			tcam += Ogre::Vector3(0,0,-cam_speed);
 		
-		if(_key->isKeyDown(OIS::KC_S))
+		if(_key->isKeyDown(OIS::KC_G))
 			tcam += Ogre::Vector3(0,0,cam_speed);
 
-		if(_key->isKeyDown(OIS::KC_A))
+		if(_key->isKeyDown(OIS::KC_F))
 			tcam += Ogre::Vector3(-cam_speed,0,0);
 		
-		if(_key->isKeyDown(OIS::KC_D))
-			tcam += Ogre::Vector3(cam_speed,0,0);
+		if(_key->isKeyDown(OIS::KC_H))
+			tcam += Ogre::Vector3(cam_speed,0,0);*/
 
+		//Spaceship navigation
+		if(_key->isKeyDown(OIS::KC_W)){
+			if(z_pos > -1280) z_pos -= spaceship_speed;
+			else {
+				z_pos = 0.0;
+				x_pos = 0.0;
+			}
+
+		}
+		if(_key->isKeyDown(OIS::KC_A)){
+			if(state == 0){
+				if(x_pos > -23.8) x_pos -= 0.1;
+				state = 2;
+				tl_counter = 0.0;
+				animationStateTurnSpaceshipLeft->setEnabled(true);
+				animationStateTurnSpaceshipLeft->setTimePosition(0);
+			} else if (state == 2){
+				if(x_pos > -23.8) x_pos -= 0.1;
+				tl_counter = 1.15;
+			} else if (state == 1){
+				animationStateTurnSpaceshipRight->setEnabled(false);
+				animationStateTurnSpaceshipCenterFR->setEnabled(true);
+				animationStateTurnSpaceshipCenterFR->setTimePosition(0);
+				turnLeftNextFrame = true;
+				state = -1;
+				tl_counter = 0.0;
+			}
+		}
+		if(_key->isKeyDown(OIS::KC_D)){
+			if(state == 0){
+				if(x_pos < 23.8) x_pos += 0.1;
+				state = 1;
+				tr_counter = 0.0;
+				animationStateTurnSpaceshipRight->setEnabled(true);
+				animationStateTurnSpaceshipRight->setTimePosition(0);
+			} else if (state == 1){
+				if(x_pos < 23.8) x_pos += 0.1;
+				tr_counter = 1.15;
+			} else if (state == 2){
+				animationStateTurnSpaceshipLeft->setEnabled(false);
+				animationStateTurnSpaceshipCenterFL->setEnabled(true);
+				animationStateTurnSpaceshipCenterFL->setTimePosition(0);
+				turnRightNextFrame = true;
+				state = -1;
+				tr_counter = 0.0;
+			}
+		}
 		if(_key->isKeyDown(OIS::KC_E)){
 			if(!open){
 				animationStateCloseWingsSpaceship1->setEnabled(false);
@@ -116,14 +189,30 @@ public:
 			}
 		}
 
-		
+		if(turnRightNextFrame){
+			animationStateTurnSpaceshipCenterFL->setEnabled(false);
+			animationStateTurnSpaceshipRight->setEnabled(true);
+			animationStateTurnSpaceshipRight->setTimePosition(0);
+			turnRightNextFrame = false;
+			state = 1;
+			tr_counter = 0.0;
+		}
+
+		if(turnLeftNextFrame){
+			animationStateTurnSpaceshipCenterFR->setEnabled(false);
+			animationStateTurnSpaceshipLeft->setEnabled(true);
+			animationStateTurnSpaceshipLeft->setTimePosition(0);
+			turnLeftNextFrame = false;
+			state = 2;
+			tl_counter = 0.0;
+		}
 
 		//camara control
-		float rotX = _mouse->getMouseState().X.rel * evt.timeSinceLastFrame*-1;
+		/*float rotX = _mouse->getMouseState().X.rel * evt.timeSinceLastFrame*-1;
 		float rotY = _mouse->getMouseState().Y.rel * evt.timeSinceLastFrame*-1;
 		_cam->yaw(Ogre::Radian(rotX));
 		_cam->pitch(Ogre::Radian(rotY));
-		_cam->moveRelative(tcam*movSpeed*evt.timeSinceLastFrame);
+		_cam->moveRelative(tcam*movSpeed*evt.timeSinceLastFrame);*/
 		
 
 		animationStateTurret301->addTime(evt.timeSinceLastFrame);
@@ -139,6 +228,35 @@ public:
 			animationStateCloseWingsSpaceship3->addTime(evt.timeSinceLastFrame);
 			animationStateCloseWingsSpaceship4->addTime(evt.timeSinceLastFrame);
 		}
+		if(animationStateTurnSpaceshipRight->getEnabled()) animationStateTurnSpaceshipRight->addTime(evt.timeSinceLastFrame);
+		if(animationStateTurnSpaceshipLeft->getEnabled()) animationStateTurnSpaceshipLeft->addTime(evt.timeSinceLastFrame);
+		if(animationStateTurnSpaceshipCenterFR->getEnabled()) animationStateTurnSpaceshipCenterFR->addTime(evt.timeSinceLastFrame);
+		if(animationStateTurnSpaceshipCenterFL->getEnabled()) animationStateTurnSpaceshipCenterFL->addTime(evt.timeSinceLastFrame);
+
+		if(state == 0){
+			
+		} else if (state == 1) {
+			if(tr_counter >= 1.3){
+				state = 0;
+				animationStateTurnSpaceshipRight->setEnabled(false);
+				animationStateTurnSpaceshipCenterFR->setEnabled(true);
+				animationStateTurnSpaceshipCenterFR->setTimePosition(0);
+			} else {
+				tr_counter += evt.timeSinceLastFrame;
+			}
+		} else if (state == 2) {
+			if(tl_counter >= 1.3){
+				state = 0;
+				animationStateTurnSpaceshipLeft->setEnabled(false);
+				animationStateTurnSpaceshipCenterFL->setEnabled(true);
+				animationStateTurnSpaceshipCenterFL->setTimePosition(0);
+			} else {
+				tl_counter += evt.timeSinceLastFrame;
+			}
+		}
+
+		nodePlayer->setPosition(x_pos, 0, z_pos);
+
 		return true;
 	}
 
@@ -275,6 +393,8 @@ public:
 
 	void createScene()
 	{
+
+		nodePlayer = mSceneMgr->getRootSceneNode()->createChildSceneNode("nodePlayer");
 		 
 		mSceneMgr->setAmbientLight(Ogre::ColourValue(1.0, 1.0, 1.0));
 		mSceneMgr->setShadowTechnique(Ogre::SHADOWTYPE_STENCIL_ADDITIVE);
@@ -455,9 +575,13 @@ public:
 	  nodeTurret03->setPosition(-22,-3,-637);
 	  nodeTurret03->setScale(0.4,0.4,0.4);
 	  
-	  //Spaceship
-
-      Ogre::SceneNode *nodeSpaceship = mSceneMgr->getRootSceneNode()->createChildSceneNode("nodeSpaceship");
+	  /*
+	  
+		Spaceship
+	  
+	  */
+	  
+      Ogre::SceneNode *nodeSpaceship = nodePlayer->createChildSceneNode("nodeSpaceship");
 	  Ogre::SceneNode *subNodeSpaceshipLeftWingUpper = nodeSpaceship->createChildSceneNode("subnodeSpaceshipLeftWingUpper");
 	  Ogre::SceneNode *subNodeSpaceshipLeftWingDown = nodeSpaceship->createChildSceneNode("subnodeSpaceshipLeftWingDown");
 	  Ogre::SceneNode *subNodeSpaceshipRightWingUpper = nodeSpaceship->createChildSceneNode("subNodeSpaceshipRightWingUpper");
@@ -507,6 +631,7 @@ public:
 	  subNodeSpaceshipRightWingUpper->setPosition(0,0,0);
 	  subNodeSpaceshipRightWingDown->setPosition(0,0,0);
 	  nodeSpaceship->setPosition(0, 0, 0);
+	  nodePlayer->setPosition(x_pos, 0, z_pos);
 
 
 	  //1 left upper wing
@@ -736,7 +861,84 @@ public:
 	  animationStateCloseWingsSpaceship3->setLoop(false);
 	  animationStateCloseWingsSpaceship4->setLoop(false);
 
-	  
+	  //Turn animations
+
+	  //Turn right 
+	  float turnAnim1 = 1.0;
+	  Ogre::Animation* animationTurnRightSpaceship = mSceneMgr->createAnimation("animTurnRightSpaceship",turnAnim1);
+	  animationTurnRightSpaceship->setInterpolationMode(Animation::IM_SPLINE);
+	  Ogre::NodeAnimationTrack* turnRightSpaceshipTrack = animationTurnRightSpaceship->createNodeTrack(0,nodeSpaceship);
+	  Ogre::TransformKeyFrame* keyTurnRight;
+
+	  keyTurnRight = turnRightSpaceshipTrack->createNodeKeyFrame(0.0);
+	  keyTurnRight->setRotation(Ogre::Quaternion(Ogre::Degree(0), Ogre::Vector3(0,0,1)));
+
+	  keyTurnRight = turnRightSpaceshipTrack->createNodeKeyFrame(0.5);
+	  keyTurnRight->setRotation(Ogre::Quaternion(Ogre::Degree(-15.0), Ogre::Vector3(0,0,1)));
+
+	  keyTurnRight = turnRightSpaceshipTrack->createNodeKeyFrame(1.0);
+	  keyTurnRight->setRotation(Ogre::Quaternion(Ogre::Degree(-30.0), Ogre::Vector3(0,0,1)));
+	  animationStateTurnSpaceshipRight = mSceneMgr->createAnimationState("animTurnRightSpaceship");
+	  //animationStateTurnSpaceshipRight->setEnabled(true);
+	  animationStateTurnSpaceshipRight->setLoop(false);
+
+	  //Turn center from right
+	  float turnAnim2 = 1.0;
+	  Ogre::Animation* animationTurnCenterFRSpaceship = mSceneMgr->createAnimation("animTurnCenterFRSpaceship",turnAnim2);
+	  animationTurnCenterFRSpaceship->setInterpolationMode(Animation::IM_SPLINE);
+	  Ogre::NodeAnimationTrack* turnCenterFRSpaceshipTrack = animationTurnCenterFRSpaceship->createNodeTrack(0,nodeSpaceship);
+	  Ogre::TransformKeyFrame* keyTurnCenterFR;
+
+	  keyTurnCenterFR = turnCenterFRSpaceshipTrack->createNodeKeyFrame(0.0);
+	  keyTurnCenterFR->setRotation(Ogre::Quaternion(Ogre::Degree(-30.0), Ogre::Vector3(0,0,1)));
+
+	  keyTurnCenterFR = turnCenterFRSpaceshipTrack->createNodeKeyFrame(0.5);
+	  keyTurnCenterFR->setRotation(Ogre::Quaternion(Ogre::Degree(-15.0), Ogre::Vector3(0,0,1)));
+
+	  keyTurnCenterFR = turnCenterFRSpaceshipTrack->createNodeKeyFrame(1.0);
+	  keyTurnCenterFR->setRotation(Ogre::Quaternion(Ogre::Degree(0.0), Ogre::Vector3(0,0,1)));
+	  animationStateTurnSpaceshipCenterFR = mSceneMgr->createAnimationState("animTurnCenterFRSpaceship");
+	  //animationStateTurnSpaceshipCenterFR->setEnabled(true);
+	  animationStateTurnSpaceshipCenterFR->setLoop(false);
+
+	  //Turn left
+	  float turnAnim3 = 1.0;
+	  Ogre::Animation* animationTurnLeftSpaceship = mSceneMgr->createAnimation("animTurnLeftSpaceship",turnAnim3);
+	  animationTurnLeftSpaceship->setInterpolationMode(Animation::IM_SPLINE);
+	  Ogre::NodeAnimationTrack* turnLeftSpaceshipTrack = animationTurnLeftSpaceship->createNodeTrack(0,nodeSpaceship);
+	  Ogre::TransformKeyFrame* keyTurnLeft;
+
+	  keyTurnLeft = turnLeftSpaceshipTrack->createNodeKeyFrame(0.0);
+	  keyTurnLeft->setRotation(Ogre::Quaternion(Ogre::Degree(0), Ogre::Vector3(0,0,1)));
+
+	  keyTurnLeft = turnLeftSpaceshipTrack->createNodeKeyFrame(0.5);
+	  keyTurnLeft->setRotation(Ogre::Quaternion(Ogre::Degree(15.0), Ogre::Vector3(0,0,1)));
+
+	  keyTurnLeft = turnLeftSpaceshipTrack->createNodeKeyFrame(1.0);
+	  keyTurnLeft->setRotation(Ogre::Quaternion(Ogre::Degree(30.0), Ogre::Vector3(0,0,1)));
+	  animationStateTurnSpaceshipLeft = mSceneMgr->createAnimationState("animTurnLeftSpaceship");
+	  //animationStateTurnSpaceshipLeft->setEnabled(true);
+	  animationStateTurnSpaceshipLeft->setLoop(false);
+
+	  //Turn center from left
+	  float turnAnim4 = 1.0;
+	  Ogre::Animation* animationTurnCenterFLSpaceship = mSceneMgr->createAnimation("animTurnCenterFLSpaceship",turnAnim4);
+	  animationTurnCenterFLSpaceship->setInterpolationMode(Animation::IM_SPLINE);
+	  Ogre::NodeAnimationTrack* turnCenterFLSpaceshipTrack = animationTurnCenterFLSpaceship->createNodeTrack(0,nodeSpaceship);
+	  Ogre::TransformKeyFrame* keyTurnCenterFL;
+
+	  keyTurnCenterFL = turnCenterFLSpaceshipTrack->createNodeKeyFrame(0.0);
+	  keyTurnCenterFL->setRotation(Ogre::Quaternion(Ogre::Degree(30.0), Ogre::Vector3(0,0,1)));
+
+	  keyTurnCenterFL = turnCenterFLSpaceshipTrack->createNodeKeyFrame(0.5);
+	  keyTurnCenterFL->setRotation(Ogre::Quaternion(Ogre::Degree(15.0), Ogre::Vector3(0,0,1)));
+
+	  keyTurnCenterFL = turnCenterFLSpaceshipTrack->createNodeKeyFrame(1.0);
+	  keyTurnCenterFL->setRotation(Ogre::Quaternion(Ogre::Degree(0.0), Ogre::Vector3(0,0,1)));
+	  animationStateTurnSpaceshipCenterFL = mSceneMgr->createAnimationState("animTurnCenterFLSpaceship");
+	  //animationStateTurnSpaceshipCenterFL->setEnabled(true);
+	  animationStateTurnSpaceshipCenterFL->setLoop(false);
+
 
 
 	}
