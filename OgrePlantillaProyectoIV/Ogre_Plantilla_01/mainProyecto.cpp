@@ -91,6 +91,10 @@ public:
 				animationStateOpenWingsSpaceship2->setEnabled(true);
 				animationStateOpenWingsSpaceship3->setEnabled(true);
 				animationStateOpenWingsSpaceship4->setEnabled(true);
+				animationStateOpenWingsSpaceship1->setTimePosition(0);
+				animationStateOpenWingsSpaceship2->setTimePosition(0);
+				animationStateOpenWingsSpaceship3->setTimePosition(0);
+				animationStateOpenWingsSpaceship4->setTimePosition(0);
 				open = true;
 			}
 		}
@@ -104,6 +108,10 @@ public:
 				animationStateCloseWingsSpaceship2->setEnabled(true);
 				animationStateCloseWingsSpaceship3->setEnabled(true);
 				animationStateCloseWingsSpaceship4->setEnabled(true);
+				animationStateCloseWingsSpaceship1->setTimePosition(0);
+				animationStateCloseWingsSpaceship2->setTimePosition(0);
+				animationStateCloseWingsSpaceship3->setTimePosition(0);
+				animationStateCloseWingsSpaceship4->setTimePosition(0);
 				open = false;
 			}
 		}
@@ -119,14 +127,18 @@ public:
 		
 
 		animationStateTurret301->addTime(evt.timeSinceLastFrame);
-		animationStateOpenWingsSpaceship1->addTime(evt.timeSinceLastFrame);
-		animationStateOpenWingsSpaceship2->addTime(evt.timeSinceLastFrame);
-		animationStateOpenWingsSpaceship3->addTime(evt.timeSinceLastFrame);
-		animationStateOpenWingsSpaceship4->addTime(evt.timeSinceLastFrame);
-		animationStateCloseWingsSpaceship1->addTime(evt.timeSinceLastFrame);
-		animationStateCloseWingsSpaceship2->addTime(evt.timeSinceLastFrame);
-		animationStateCloseWingsSpaceship3->addTime(evt.timeSinceLastFrame);
-		animationStateCloseWingsSpaceship4->addTime(evt.timeSinceLastFrame);
+		if (animationStateOpenWingsSpaceship1->getEnabled()){
+			animationStateOpenWingsSpaceship1->addTime(evt.timeSinceLastFrame);
+			animationStateOpenWingsSpaceship2->addTime(evt.timeSinceLastFrame);
+			animationStateOpenWingsSpaceship3->addTime(evt.timeSinceLastFrame);
+			animationStateOpenWingsSpaceship4->addTime(evt.timeSinceLastFrame);
+		}
+		if (animationStateCloseWingsSpaceship1->getEnabled()){
+			animationStateCloseWingsSpaceship1->addTime(evt.timeSinceLastFrame);
+			animationStateCloseWingsSpaceship2->addTime(evt.timeSinceLastFrame);
+			animationStateCloseWingsSpaceship3->addTime(evt.timeSinceLastFrame);
+			animationStateCloseWingsSpaceship4->addTime(evt.timeSinceLastFrame);
+		}
 		return true;
 	}
 
