@@ -1,7 +1,7 @@
 #include "Ogre\ExampleApplication.h"
 #include <ctime> 
 
-float test;
+
 
 
 struct Laser
@@ -53,11 +53,7 @@ Ogre::AnimationState* animationStateTurnSpaceshipCenterFL;
 
 float x_pos = 0.0;
 float z_pos = 0.0;
-
-
 Ogre::SceneNode *nodePlayer;
-
-
 Ogre::Real tr_counter = 0.0;
 Ogre::Real tl_counter = 0.0;
 float spaceship_speed = 0.8;
@@ -122,28 +118,8 @@ public:
 		_key->capture();
 		_mouse->capture();
 
-		float movSpeed=10.0f;
-		Ogre::Vector3 tmov(0,0,0);
-		Ogre::Vector3 tcam(0,0,0);
-
-		//Camara
-		if(_key->isKeyDown(OIS::KC_LSHIFT))
-			cam_speed += 30;
-
 		if (_key->isKeyDown(OIS::KC_ESCAPE))
 			return false;
-
-		/*if(_key->isKeyDown(OIS::KC_T))
-			tcam += Ogre::Vector3(0,0,-cam_speed);
-		
-		if(_key->isKeyDown(OIS::KC_G))
-			tcam += Ogre::Vector3(0,0,cam_speed);
-
-		if(_key->isKeyDown(OIS::KC_F))
-			tcam += Ogre::Vector3(-cam_speed,0,0);
-		
-		if(_key->isKeyDown(OIS::KC_H))
-			tcam += Ogre::Vector3(cam_speed,0,0);*/
 
 		//Spaceship navigation
 		if(_key->isKeyDown(OIS::KC_W)){
@@ -245,13 +221,7 @@ public:
 			tl_counter = 0.0;
 		}
 
-		//camara control
-		/*float rotX = _mouse->getMouseState().X.rel * evt.timeSinceLastFrame*-1;
-		float rotY = _mouse->getMouseState().Y.rel * evt.timeSinceLastFrame*-1;
-		_cam->yaw(Ogre::Radian(rotX));
-		_cam->pitch(Ogre::Radian(rotY));
-		_cam->moveRelative(tcam*movSpeed*evt.timeSinceLastFrame);*/
-		
+		//Turret 4 animation
 		animationStateTurret401->addTime(evt.timeSinceLastFrame);
 
 		//Laser movements
@@ -449,7 +419,6 @@ public:
 		Ogre::SceneNode* node01 = mSceneMgr->createSceneNode("Node01");
 		mSceneMgr->getRootSceneNode()->addChild(node01);
 		node01->attachObject(ent01);
-		//node01->setPosition(0,0,20);
 
 		Ogre::Entity* entEscena01 = mSceneMgr->createEntity("ogre_base01.mesh");
 		mSceneMgr->getRootSceneNode()->attachObject(entEscena01);
@@ -545,8 +514,6 @@ public:
 		nodeTurret02->setPosition(22,-7,-407);
 		nodeTurret02->rotate(Quaternion (Degree(-2.5), Vector3::UNIT_Y));
 
-	  
-
 		// Turret 3.
 		Ogre::SceneNode *nodeTurret03 = mSceneMgr->createSceneNode();
 		mSceneMgr->getRootSceneNode()->addChild(nodeTurret03);
@@ -582,8 +549,6 @@ public:
 		subNodeTurret304->setPosition(0,-10,0);
 		subNodeTurret304->setScale(3,3,3);
 
-	  
-	  
 		nodeTurret03->addChild(subnodeTurret301);
 		nodeTurret03->addChild(subNodeTurret302);
 		nodeTurret03->addChild(subNodeTurret303);
@@ -602,10 +567,7 @@ public:
 		subEntityTorret401->setMaterialName("DarkGrey");
 		Ogre::SceneNode *subnodeTurret401 = mSceneMgr->createSceneNode();
 		subnodeTurret401->attachObject(subEntityTorret401);
-		subnodeTurret401->setPosition(0,0,0);
-		//subnodeTurret401->setScale(1,2.5,1);
-	  
-	  
+		subnodeTurret401->setPosition(0,0,0);  
 
 		Ogre::Entity *subEntityTorret402 = mSceneMgr->createEntity("subEntityTorret402", "cube.mesh");
 		subEntityTorret402->setMaterialName("Grey");
@@ -674,8 +636,6 @@ public:
 		keyTurret04->setRotation(Quaternion (Degree(180), Vector3::UNIT_Z));
 		keyTurret04->setScale(Vector3(0.8,0.8,0.8));
 		keyTurret04->setTranslate(Vector3(0,4.7,3.5));
-
-		
 
 		animationStateTurret401 = mSceneMgr->createAnimationState("AnimTurret401");
 		animationStateTurret401->setEnabled(true);
@@ -1041,7 +1001,6 @@ public:
 	  keyTurnRight = turnRightSpaceshipTrack->createNodeKeyFrame(1.0);
 	  keyTurnRight->setRotation(Ogre::Quaternion(Ogre::Degree(-30.0), Ogre::Vector3(0,0,1)));
 	  animationStateTurnSpaceshipRight = mSceneMgr->createAnimationState("animTurnRightSpaceship");
-	  //animationStateTurnSpaceshipRight->setEnabled(true);
 	  animationStateTurnSpaceshipRight->setLoop(false);
 
 	  //Turn center from right
@@ -1060,7 +1019,6 @@ public:
 	  keyTurnCenterFR = turnCenterFRSpaceshipTrack->createNodeKeyFrame(1.0);
 	  keyTurnCenterFR->setRotation(Ogre::Quaternion(Ogre::Degree(0.0), Ogre::Vector3(0,0,1)));
 	  animationStateTurnSpaceshipCenterFR = mSceneMgr->createAnimationState("animTurnCenterFRSpaceship");
-	  //animationStateTurnSpaceshipCenterFR->setEnabled(true);
 	  animationStateTurnSpaceshipCenterFR->setLoop(false);
 
 	  //Turn left
@@ -1079,7 +1037,6 @@ public:
 	  keyTurnLeft = turnLeftSpaceshipTrack->createNodeKeyFrame(1.0);
 	  keyTurnLeft->setRotation(Ogre::Quaternion(Ogre::Degree(30.0), Ogre::Vector3(0,0,1)));
 	  animationStateTurnSpaceshipLeft = mSceneMgr->createAnimationState("animTurnLeftSpaceship");
-	  //animationStateTurnSpaceshipLeft->setEnabled(true);
 	  animationStateTurnSpaceshipLeft->setLoop(false);
 
 	  //Turn center from left
@@ -1098,36 +1055,8 @@ public:
 	  keyTurnCenterFL = turnCenterFLSpaceshipTrack->createNodeKeyFrame(1.0);
 	  keyTurnCenterFL->setRotation(Ogre::Quaternion(Ogre::Degree(0.0), Ogre::Vector3(0,0,1)));
 	  animationStateTurnSpaceshipCenterFL = mSceneMgr->createAnimationState("animTurnCenterFLSpaceship");
-	  //animationStateTurnSpaceshipCenterFL->setEnabled(true);
 	  animationStateTurnSpaceshipCenterFL->setLoop(false);
 
-
-
-		
-
-
-
-		////Laser animation
-		//float duration3 = 3.0;
-		//Ogre::Animation* animationLaser01 = mSceneMgr->createAnimation("AnimLaser01",duration3);
-		//animationLaser01->setInterpolationMode(Animation::IM_SPLINE);
-		//Ogre::NodeAnimationTrack* Laser01Track = animationLaser01->createNodeTrack(0,subNodeLaser01);
-		//Ogre::TransformKeyFrame* keyLaser01;
-
-		//keyLaser01 = Laser01Track->createNodeKeyFrame(0.0);
-		//keyLaser01->setRotation(Quaternion (Degree(0), Vector3::UNIT_Z));
-		//keyLaser01->setScale(Vector3(0.8,0.8,0.8));
-		//keyLaser01->setTranslate(Vector3(0,4.7,3.5));
-
-		//keyLaser01 = Laser01Track->createNodeKeyFrame(1.0);
-		//keyLaser01->setRotation(Quaternion (Degree(90), Vector3::UNIT_Z));
-		//keyLaser01->setScale(Vector3(0.8,0.8,0.8));
-		//keyLaser01->setTranslate(Vector3(0,4.7,3.5));
-
-		//keyLaser01 = Laser01Track->createNodeKeyFrame(2.0);
-		//keyLaser01->setRotation(Quaternion (Degree(180), Vector3::UNIT_Z));
-		//keyLaser01->setScale(Vector3(0.8,0.8,0.8));
-		//keyLaser01->setTranslate(Vector3(0,4.7,3.5));
 	}
 
 };
